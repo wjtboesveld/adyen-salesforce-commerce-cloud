@@ -8,7 +8,7 @@ function modifyGETResponse(paymentMethodResultResponse : PaymentMethodResult) {
 	if(request.clientId === "dw.csc")
       {
            var applicablePaymentMethods = [];
-           /* CustomAdyen 
+           /* CustomAdyen */
             for (var index in paymentMethodResultResponse.applicablePaymentMethods) {
             	
             	var paymentMethod = paymentMethodResultResponse.applicablePaymentMethods[index];
@@ -20,9 +20,9 @@ function modifyGETResponse(paymentMethodResultResponse : PaymentMethodResult) {
             	
             }
             paymentMethodResultResponse.applicablePaymentMethods = applicablePaymentMethods;
-            */
-            applicablePaymentMethods.push(paymentMethodResultResponse.applicablePaymentMethods[1]);
-         paymentMethodResultResponse.applicablePaymentMethods = applicablePaymentMethods;   
+            
+          /*  applicablePaymentMethods.push(paymentMethodResultResponse.applicablePaymentMethods[1]);
+         paymentMethodResultResponse.applicablePaymentMethods = applicablePaymentMethods; */  
       }
  
     return new Status(Status.OK);

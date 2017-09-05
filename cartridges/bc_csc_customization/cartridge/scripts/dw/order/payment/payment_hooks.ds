@@ -3,6 +3,8 @@ importPackage( dw.order );
 importPackage( dw.value );
 importPackage(dw.util);
 
+//var app = require('~/cartridge/scripts/app');
+//var PaymentProcessor = app.getModel('PaymentProcessor');
 
 function authorize(order : Order, opi : OrderPaymentInstrument)
 {
@@ -29,7 +31,7 @@ function authorizeCreditCard(order : Order, opi : OrderPaymentInstrument, cvn : 
 {
 	var pt : PaymentTransaction = opi.getPaymentTransaction();
 	var paymentInstr : PaymentInstrument = order.createPaymentInstrument("Adyen_Credit", pt.amount);
-	
+	//PaymentProcessor.authorize(order, paymentInstr);
 	// Change PaymentInstrument to Adyen_Credit
 	//link your payment cartridge here...
 	var ccno : String = opi.getCreditCardNumber();
