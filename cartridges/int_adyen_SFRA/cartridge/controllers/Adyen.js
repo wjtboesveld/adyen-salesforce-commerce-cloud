@@ -155,7 +155,8 @@ server.get('ShowConfirmation', server.middleware.https, function (req, res, next
 
 server.get('GetPaymentMethods', server.middleware.https, function (req, res, next) {
   var BasketMgr = require('dw/order/BasketMgr');
-  var	getPaymentMethods = require('*/cartridge/scripts/getPaymentMethodsSHA256');
+  var Resource = require('dw/web/Resource');
+  var getPaymentMethods = require('*/cartridge/scripts/getPaymentMethodsSHA256');
   var paymentMethods;
   try {
     paymentMethods = getPaymentMethods.getMethods(BasketMgr.getCurrentBasket()).paymentMethods;
@@ -163,11 +164,35 @@ server.get('GetPaymentMethods', server.middleware.https, function (req, res, nex
     paymentMethods = [];
   }
 
+  var descriptions = [];
+  paymentMethods.forEach(function (method){
+     descriptions.push({ brandCode : method.brandCode, description : Resource.msg('hpp.description.' + method.brandCode, 'hpp', "")});
+   })
+
   res.json({
-    AdyenHppPaymentMethods: paymentMethods,
-    ImagePath: URLUtils.staticURL('/images/').toString()
+      AdyenHppPaymentMethods: paymentMethods,
+      ImagePath: URLUtils.staticURL('/images/').toString(),
+      AdyenDescriptions : descriptions
   });
   return next();
+});
+
+/**
+ * Called by Adyen to update status of payments. It should always display [accepted] when finished.
+ */
+server.post('Notify', server.middleware.https, function (req, res, next) {
+    var	checkAuth = require('int_adyen_overlay/cartridge/scripts/checkNotificationAuth');
+    var status = checkAuth.check(req);
+    if (!status) {
+        res.render('/error');
+        return {};
+    }
+    var	handleNotify = require('int_adyen_overlay/cartridge/scripts/handleNotify');
+    Transaction.wrap(function () {
+        handleNotify.notify(req.form);
+    });
+    res.render('/notify');
+    next();
 });
 
 /**
@@ -189,6 +214,8 @@ function clearCustomSessionFields() {
   session.custom.order = null;
   session.custom.brandCode = null;
   session.custom.issuerId = null;
+  session.custom.adyenPaymentMethod = null;
+  session.custom.adyenIssuerName = null;
 }
 
 module.exports = server.exports();
