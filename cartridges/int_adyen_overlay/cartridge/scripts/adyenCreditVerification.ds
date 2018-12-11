@@ -150,18 +150,14 @@ function verify(args) {
         // make API call
         var requestObject = AdyenHelper.extend(jsonObject, shopperObject);
 
-        var callResult = null;
-        var service = AdyenHelper.getService(AdyenHelper.SERVICE.PAYMENT);
+        var service = AdyenHelper.getXApiService(AdyenHelper.SERVICE.PAYMENT);
         if (service == null) {
             return {error: true};
         }
-        var resultObject = null;
 
-        service.addHeader('Content-type','application/json');
-        service.addHeader('charset', 'UTF-8');
-        callResult = service.call(JSON.stringify(requestObject));
+        var callResult = service.call(JSON.stringify(requestObject));
         if (callResult.isOk() == false){
-            Logger.error('Adyen: Call error code' +  callResult.getError().toString() + ' Error => ResponseStatus: ' + callResult.getStatus()  + ' | ResponseErrorText: ' +  callResult.getErrorMessage() + ' | ResponseText: ' + callResult.getMsg());
+            Logger.error('Adyen: Call error code' + callResult.getError().toString() + ' Error => ResponseStatus: ' + callResult.getStatus()  + ' | ResponseErrorText: ' +  callResult.getErrorMessage() + ' | ResponseText: ' + callResult.getMsg());
             args.AdyenErrorMessage = dw.web.Resource.msg('confirm.error.declined','checkout', null);
             return {
                 error: true,
@@ -169,7 +165,7 @@ function verify(args) {
             };
         }
 
-        resultObject = callResult.object;
+        var resultObject = callResult.object;
 
         var resultObj = {
             statusCode: resultObject.getStatusCode(),

@@ -57,6 +57,17 @@ var __AdyenHelper : Object = {
         return adyenService;
     },
 
+    // Returns a service object with json content-type and x-api-key header
+    getXApiService : function (serviceName : String) : Object {
+        var service = this.getService(serviceName);
+
+        service.addHeader('Content-type','application/json');
+        service.addHeader('charset', 'UTF-8');
+        service.addHeader('X-API-key', this.getAdyenApiKey());
+
+        return service;
+    },
+
     getAdyenMode : function () : String {
         var returnValue : String = "";
         if(!empty(adyenCurrentSite) && !empty(adyenCurrentSite.getCustomPreferenceValue('Adyen_Mode'))) {
