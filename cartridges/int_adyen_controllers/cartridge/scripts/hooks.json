@@ -11,6 +11,10 @@
 				{
 			"name": "app.payment.processor.Adyen_POS",
 			"script": "./payment/processor/Adyen_POS"
+		},
+		{
+			"name": "dw.extensions.paymentapi.beforeAuthorization",
+			"script": "./payment/applepay.js"
 		}
 	]
 }
