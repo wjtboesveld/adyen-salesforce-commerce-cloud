@@ -38,6 +38,30 @@ function renderCardComponent() {
         }
     });
     card.mount(cardNode);
+
+    var cardComponent = document.querySelector('adyen-payment-method-card');
+    cardComponent.addEventListener('adyenChange', function (event) {
+        var state = event.detail.state;
+        console.log("onchange");
+        console.log(state);
+        isValid = state.isValid;
+        storeDetails = state.data.storePaymentMethod;
+        $('#browserInfo').val(JSON.stringify(state.data.browserInfo));
+        card.state = state;
+    });
+
+    cardComponent.addEventListener('adyenBrand', function (event) {
+        var brand = event.detail.brand;
+        $('#cardType').val(brand);
+    });
+
+    cardComponent.addEventListener('adyenFieldValid', function (event) {
+        var data = event.detail.data;
+        if(data.endDigits){
+            maskedCardNumber = MASKED_CC_PREFIX + data.endDigits;
+        }
+    });
+
 };
 
 function renderOneClickComponents() {
@@ -304,6 +328,7 @@ function isNordicCountry(country) {
 
 //Submit the payment
 $('button[value="submit-payment"]').on('click', function (e) {
+    debugger;
     if ($('#selectedPaymentOption').val() == 'CREDIT_CARD') {
         //new card payment
         if ($('.payment-information').data('is-new-payment')) {
@@ -331,20 +356,9 @@ $('button[value="submit-payment"]').on('click', function (e) {
             }
         }
     } else if ($('#selectedPaymentOption').val() == 'Adyen') {
-        var selectedMethod = $("input[name='brandCode']:checked");
-        //no payment method selected
-        if (!adyenPaymentMethodSelected(selectedMethod.val())) {
-            $('#requiredBrandCode').show();
-            return false;
-        }
-        //check component details
-        else {
-            var componentState = checkComponentDetails(selectedMethod);
-            $('#adyenPaymentMethod').val($("input[name='brandCode']:checked").attr('id').substr(3));
-            return componentState;
-        }
+        console.log("Adyen paymentmethod");
+        return true;
     }
-
     return true;
 });
 

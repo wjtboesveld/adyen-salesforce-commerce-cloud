@@ -6,7 +6,7 @@
                value="Adyen"
         >
         <fieldset class="">
-            <isinclude template="checkout/billing/alternativePaymentMethodForm" />
+            <isinclude template="checkout/billing/GenericComponent" />
         </fieldset>
     </fieldset>
 </div>
