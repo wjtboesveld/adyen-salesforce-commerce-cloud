@@ -115,6 +115,7 @@ function displayPaymentMethods() {
         });
 
         $('input[type=radio][name=brandCode]').change(function () {
+            console.log($(this).val());
             resetPaymentMethod();
             $('#component_' + $(this).val()).show();
         });
@@ -294,20 +295,12 @@ function addPaymentMethod(paymentMethod, imagePath, description) {
 
     if (paymentMethod.details) {
         if (paymentMethod.details.constructor == Array && paymentMethod.details[0].key == "issuer") {
-            var additionalFields = $('<div>').addClass('additionalFields')
+            const genericPaymentMethodComponent = document.createElement('adyen-payment-method-generic');
+            $(genericPaymentMethodComponent).attr('type', paymentMethod.type)
+                .addClass('additionalFields')
                 .attr('id', 'component_' + paymentMethod.type)
                 .attr('style', 'display:none');
-
-            var issuers = $('<select>').attr('id', 'issuerList');
-            jQuery.each(paymentMethod.details[0].items, function (i, issuer) {
-                var issuerOption = $('<option>')
-                    .attr('label', issuer.name)
-                    .attr('value', issuer.id)
-                    .html(issuer.name);
-                issuers.append(issuerOption);
-            });
-            additionalFields.append(issuers);
-            li.append(additionalFields);
+            li.append(genericPaymentMethodComponent);
         }
     }
     $('#paymentMethodsUl').append(li);
@@ -504,4 +497,3 @@ module.exports = {
         displayPaymentMethods: displayPaymentMethods
     }
 };
-
