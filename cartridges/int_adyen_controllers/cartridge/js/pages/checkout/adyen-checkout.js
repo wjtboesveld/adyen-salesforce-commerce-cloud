@@ -24,10 +24,11 @@
             return showValidation();
         });
 
+    if (window.getPaymentMethodsResponse) {
         paymentMethodsResponse = window.getPaymentMethodsResponse;
         checkoutConfiguration = window.Configuration;
         console.log(checkoutConfiguration);
-        checkoutConfiguration.onChange = function(state, component){
+        checkoutConfiguration.onChange = function (state, component) {
             isValid = state.isValid;
             var type = state.data.paymentMethod.type;
             componentArr[type].isValid = isValid;
@@ -262,9 +263,7 @@
                               <img class="paymentMethod_img" src="${imagePath}" ></img>
                               <label id="lb_${paymentMethodID}" for="rb_${paymentMethodID}" style="float: none; width: 100%; display: inline; text-align: inherit">${label}</label>
                              `;
-        if(description)
-            liContents += `<p>${description}</p>`;
-        var container = document.createElement("div");
+    var container = document.createElement("div");
 
         li.innerHTML = liContents;
         li.classList.add('paymentMethod');
