@@ -89,8 +89,17 @@
      * @description Initializes Adyen Checkout My Account events
      */
     function initializeAccountEvents() {
+        //TODOBAS create checkout card component
+        checkoutConfiguration = window.Configuration;
+        console.log(checkoutConfiguration);
+
+        checkout = new AdyenCheckout(checkoutConfiguration);
+        var newCard = document.getElementById("newCard");
+        var node = checkout.create("card").mount(newCard);
+
         $('#add-card-submit').on('click', function (e) {
             e.preventDefault();
+            //TODOBAS onsubmit
             if (window.AdyenCard.isValid) {
                 copyCardData(window.AdyenCard);
                 $('#add-card-submit-hidden').trigger('click');
