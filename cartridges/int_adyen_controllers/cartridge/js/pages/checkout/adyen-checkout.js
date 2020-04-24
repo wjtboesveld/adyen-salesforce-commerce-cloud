@@ -91,21 +91,27 @@
      * @description Initializes Adyen Checkout My Account events
      */
     function initializeAccountEvents() {
-        //TODOBAS create checkout card component
         checkoutConfiguration = window.Configuration;
-        console.log(checkoutConfiguration);
-
         checkout = new AdyenCheckout(checkoutConfiguration);
         var newCard = document.getElementById("newCard");
-        var node = checkout.create("card").mount(newCard);
-
-        $('#add-card-submit').on('click', function (e) {
-            e.preventDefault();
-            //TODOBAS onsubmit
-            if (window.AdyenCard.isValid) {
-                copyCardData(window.AdyenCard);
-                $('#add-card-submit-hidden').trigger('click');
+        var adyenStateData;
+        var isValid = false;
+        var node = checkout.create("card", {
+            hasHolderName: true,
+            holderNameRequired: true,
+            onChange: function(state) {
+                adyenStateData = state.data;
+                isValid = state.isValid;
             }
+        }).mount(newCard);
+
+        $('#applyBtn').on('click', function (e) {
+            if (!isValid) {
+                //TODOBAS showvalidation
+                node.showValidation();
+                return false;
+            }
+            document.querySelector("#adyenStateData").value = JSON.stringify(adyenStateData);
         });
     }
 
