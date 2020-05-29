@@ -1,42 +1,31 @@
-"use strict";
-const csrfProtection = require("*/cartridge/scripts/middleware/csrf");
-const consentTracking = require("*/cartridge/scripts/middleware/consentTracking");
-const adyenGetOriginKey = require("*/cartridge/scripts/adyenGetOriginKey");
-const AdyenHelper = require("*/cartridge/scripts/util/AdyenHelper");
+'use strict';
+var csrfProtection = require('*/cartridge/scripts/middleware/csrf');
+var consentTracking = require('*/cartridge/scripts/middleware/consentTracking');
+var adyenGetOriginKey = require('*/cartridge/scripts/adyenGetOriginKey');
+var AdyenHelper = require('*/cartridge/scripts/util/AdyenHelper');
 
-const server = require("server");
+var server = require('server');
 server.extend(module.superModule);
 
-server.prepend(
-  "Begin",
-  server.middleware.https,
-  consentTracking.consent,
-  csrfProtection.generateToken,
-  function (req, res, next) {
-    if (req.currentCustomer.raw.isAuthenticated()) {
-      require("*/cartridge/scripts/updateSavedCards").updateSavedCards({
-        CurrentCustomer: req.currentCustomer.raw,
-      });
-    }
+server.prepend('Begin', server.middleware.https, consentTracking.consent, csrfProtection.generateToken, function (req, res, next) {
+        if (req.currentCustomer.raw.isAuthenticated()) {
+            require('*/cartridge/scripts/updateSavedCards').updateSavedCards({CurrentCustomer: req.currentCustomer.raw});
+        }
 
-    const protocol = req.https ? "https" : "http";
-    const originKey = adyenGetOriginKey.getOriginKeyFromRequest(
-      protocol,
-      req.host
-    );
-    const environment = AdyenHelper.getAdyenEnvironment().toLowerCase();
-    const installments = AdyenHelper.getCreditCardInstallments();
+        var protocol = req.https ? "https" : "http";
+        var originKey = adyenGetOriginKey.getOriginKeyFromRequest(protocol, req.host);
+        var environment = AdyenHelper.getAdyenEnvironment().toLowerCase();
+        var installments = AdyenHelper.getCreditCardInstallments();
 
-    const viewData = res.getViewData();
-    viewData.adyen = {
-      originKey: originKey,
-      environment: environment,
-      installments: installments,
-    };
+        var viewData = res.getViewData();
+        viewData.adyen = {
+            originKey : originKey,
+            environment: environment,
+            installments: installments
+        };
 
-    res.setViewData(viewData);
-    next();
-  }
-);
+        res.setViewData(viewData);
+        next();
+    });
 
 module.exports = server.exports();

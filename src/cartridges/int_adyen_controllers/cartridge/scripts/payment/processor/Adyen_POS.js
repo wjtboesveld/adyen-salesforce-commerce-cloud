@@ -1,94 +1,74 @@
-"use strict";
+'use strict';
 
 /* API Includes */
-const PaymentMgr = require("dw/order/PaymentMgr");
-const Resource = require("dw/web/Resource");
-const Transaction = require("dw/system/Transaction");
-const Logger = require("dw/system/Logger");
-const constants = require("*/cartridge/adyenConstants/constants");
+var PaymentMgr = require('dw/order/PaymentMgr');
+var Resource = require("dw/web/Resource");
+var Transaction = require("dw/system/Transaction");
+var Logger = require('dw/system/Logger');
+var constants = require("*/cartridge/adyenConstants/constants");
 /* Script Modules */
-require("app_storefront_controllers/cartridge/scripts/app");
+var app = require('app_storefront_controllers/cartridge/scripts/app');
 
 /**
  * Creates a Adyen payment instrument for the given basket
  */
 function handle(args) {
-  const adyenRemovePreviousPI = require("*/cartridge/scripts/adyenRemovePreviousPI");
+	var adyenRemovePreviousPI = require('*/cartridge/scripts/adyenRemovePreviousPI');
 
-  Transaction.wrap(function () {
-    const result = adyenRemovePreviousPI.removePaymentInstruments(args.Basket);
-    if (result.error) {
-      return result;
-    }
+    Transaction.wrap(function () {
+    	var result = adyenRemovePreviousPI.removePaymentInstruments(args.Basket);
+        if (result.error) {
+    		return result;
+    	}
 
-    const paymentInstrument = args.Basket.createPaymentInstrument(
-      constants.METHOD_ADYEN_POS,
-      args.Basket.totalGrossPrice
-    );
-    paymentInstrument.custom.adyenPaymentMethod = "POS Terminal";
-  });
+        var paymentInstrument = args.Basket.createPaymentInstrument(
+            constants.METHOD_ADYEN_POS, args.Basket.totalGrossPrice
+        );
+        paymentInstrument.custom.adyenPaymentMethod = "POS Terminal";
+    });
 
-  return { success: true };
+    return { success: true };
 }
 
 /**
- * Authorizes a payment using a POS terminal.
- * The payment is authorized by using the Adyen_POS processor only and setting the order no as the transaction ID.
+ * Authorizes a payment using a POS terminal. 
+ * The payment is authorized by using the Adyen_POS processor only and setting the order no as the transaction ID. 
  */
 function authorize(args) {
-  let errors;
-  const adyenTerminalApi = require("*/cartridge/scripts/adyenTerminalApi");
-  const order = args.Order;
-  const orderNo = args.OrderNo;
-  const paymentInstrument = args.PaymentInstrument;
-  const paymentProcessor = PaymentMgr.getPaymentMethod(
-    paymentInstrument.getPaymentMethod()
-  ).getPaymentProcessor();
+    var adyenTerminalApi = require("*/cartridge/scripts/adyenTerminalApi");
+    var order = args.Order;
+    var orderNo = args.OrderNo;
+    var paymentInstrument = args.PaymentInstrument;
+    var paymentProcessor = PaymentMgr.getPaymentMethod(paymentInstrument.getPaymentMethod()).getPaymentProcessor();
 
-  Transaction.wrap(function () {
-    paymentInstrument.paymentTransaction.transactionID = orderNo;
-    paymentInstrument.paymentTransaction.paymentProcessor = paymentProcessor;
-  });
+    Transaction.wrap(function () {
+        paymentInstrument.paymentTransaction.transactionID = orderNo;
+        paymentInstrument.paymentTransaction.paymentProcessor = paymentProcessor;
+    });
 
-  const paymentForm = session.forms.adyPaydata;
+    var paymentForm = session.forms.adyPaydata;
 
-  const terminalId = paymentForm.terminalId.value;
+    var terminalId = paymentForm.terminalId.value;
 
-  if (!terminalId) {
-    Logger.getLogger("Adyen").error("No terminal selected");
-    errors = [];
-    errors.push(
-      Resource.msg("error.payment.processor.not.supported", "checkout", null)
-    );
-    return {
-      authorized: false,
-      fieldErrors: [],
-      serverErrors: errors,
-      error: true,
-    };
-  }
+    if (!terminalId) {
+        Logger.getLogger("Adyen").error("No terminal selected");
+        var errors = [];
+        errors.push(Resource.msg("error.payment.processor.not.supported", "checkout", null));
+        return {
+            authorized: false, fieldErrors: [], serverErrors: errors, error: true
+        };
+    }
 
-  const result = adyenTerminalApi.createTerminalPayment(
-    order,
-    paymentInstrument,
-    terminalId
-  );
-  if (result.error) {
-    Logger.getLogger("Adyen").error(
-      "POS Authorise error, result: " + result.response
-    );
-    errors = [];
-    errors.push(
-      Resource.msg("error.payment.processor.not.supported", "checkout", null)
-    );
-    return {
-      authorized: false,
-      fieldErrors: [],
-      serverErrors: errors,
-      error: true,
-    };
-  }
-  return result;
+    var result = adyenTerminalApi.createTerminalPayment(order, paymentInstrument, terminalId);
+    if (result.error) {
+        Logger.getLogger("Adyen").error("POS Authorise error, result: " + result.response);
+        var errors = [];
+        errors.push(Resource.msg("error.payment.processor.not.supported", "checkout", null));
+        return {
+            authorized: false, fieldErrors: [], serverErrors: errors, error: true
+        };
+    }
+    return result;
 }
 
 exports.Handle = handle;
