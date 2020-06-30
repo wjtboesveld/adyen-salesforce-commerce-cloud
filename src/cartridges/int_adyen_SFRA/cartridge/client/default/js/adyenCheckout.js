@@ -133,6 +133,19 @@ checkoutConfiguration.paymentMethodsConfiguration = {
       },
     },
   },
+  // paywithgoogle: {
+  //   environment: "TEST", // Change this to PRODUCTION when you're ready to accept live Google Pay payments
+  //   // amount: {
+  //   //   currency: "EUR",
+  //   //   value: 1000
+  //   // },
+  //   configuration: {
+  //     gatewayMerchantId: "CommerceCloudZaid",  //Your Adyen merchant or company account name
+  //     // merchantIdentifier: "12345678910111213141", // Required for PRODUCTION. Remove this field in TEST. Your Google Merchant ID as described in https://developers.google.com/pay/api/web/guides/test-and-deploy/deploy-production-environment#obtain-your-merchantID
+  //     merchantName: "Merchant Zaid" // Optional. The name that appears in the payment sheet.
+  //   },
+  //   buttonColor: "white" //Optional. Use a white Google Pay button.
+  // }
 };
 if (window.installments) {
   try {
@@ -297,7 +310,25 @@ function renderPaymentMethod(
       container.append(template.content);
     } else {
       try {
-        node = checkout.create(paymentMethod.type);
+        if(paymentMethod.type === "paywithgoogle") {
+          node = checkout.create(paymentMethod.type, {
+            environment: "TEST", // Change this to PRODUCTION when you're ready to accept live Google Pay payments
+            amount: {
+              currency: "EUR",
+              value: 1000
+            },
+            configuration: {
+              gatewayMerchantId: "CommerceCloudZaid",  //Your Adyen merchant or company account name
+              merchantName: "Zaid Merchant" // Optional. The name that appears in the payment sheet.
+            },
+            buttonColor: "black", //Optional. Use a white Google Pay button.
+            buttonType: "long",
+            emailRequired: true
+            //For other optional configuration, see section below.
+          });
+        } else {
+          node = checkout.create(paymentMethod.type);
+        }
         if (!componentsObj[paymentMethodID]) {
           componentsObj[paymentMethodID] = {};
         }
@@ -312,7 +343,26 @@ function renderPaymentMethod(
   li.append(container);
   paymentMethodsUI.append(li);
 
-  node && node.mount(container);
+  if(paymentMethod.type === "paywithgoogle") {
+    node.isAvailable()
+        .then(() => {
+          console.log(node);
+          try {
+            node.mount(document.querySelector("#googlepay-container"))
+          }
+          catch (e) {
+            console.error(e);
+          }
+        })
+        .catch(e => {
+          console.log(e);
+          // Google Pay is not available
+        });
+  }
+  else {
+    // paymentMethod.type === "paywithgoogle" && !node.isAvailable() ? node = null : null;
+    node && node.mount(container);
+  }
 
   const input = document.querySelector(`#rb_${paymentMethodID}`);
   input.onchange = (event) => {

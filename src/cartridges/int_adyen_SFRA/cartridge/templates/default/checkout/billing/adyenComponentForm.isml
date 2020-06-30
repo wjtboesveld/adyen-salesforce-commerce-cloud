@@ -1,9 +1,11 @@
 <iscontent type="text/html" encoding="off"/>
 <link rel="stylesheet" type="text/css" href="${pdict.AdyenHelper.getCheckoutCSS()}"/>
 <isset name="adyenOneClickEnabled" value="${pdict.AdyenHelper.getAdyenOneClickEnabled()}" scope="page"/>
+<script src="https://pay.google.com/gp/p/js/pay.js"></script>
+<script src="${pdict.AdyenHelper.getCheckoutUrl()}" type="text/javascript"></script>
 <isscript>
-    var assets = require('*/cartridge/scripts/assets.js');
-    assets.addJs('/js/bundle.js');
+<!--    var assets = require('*/cartridge/scripts/assets.js');-->
+<!--    assets.addJs('/js/bundle.js');-->
 </isscript>
 <script>
     window.Configuration = {
@@ -30,6 +32,7 @@
 <input id="selectedIssuer" type="hidden" ${adyenPaymentFields.issuer.attributes}/>
 
 <ul id="paymentMethodsList"></ul>
+<div id="googlepay-container"></div>
 
 <iscomment>
     Adyen RatePay Device Fingerprint Code
