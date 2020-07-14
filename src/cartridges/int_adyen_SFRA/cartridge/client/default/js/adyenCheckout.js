@@ -133,19 +133,39 @@ checkoutConfiguration.paymentMethodsConfiguration = {
       },
     },
   },
-  // paywithgoogle: {
-  //   environment: "TEST", // Change this to PRODUCTION when you're ready to accept live Google Pay payments
-  //   // amount: {
-  //   //   currency: "EUR",
-  //   //   value: 1000
-  //   // },
-  //   configuration: {
-  //     gatewayMerchantId: "CommerceCloudZaid",  //Your Adyen merchant or company account name
-  //     // merchantIdentifier: "12345678910111213141", // Required for PRODUCTION. Remove this field in TEST. Your Google Merchant ID as described in https://developers.google.com/pay/api/web/guides/test-and-deploy/deploy-production-environment#obtain-your-merchantID
-  //     merchantName: "Merchant Zaid" // Optional. The name that appears in the payment sheet.
-  //   },
-  //   buttonColor: "white" //Optional. Use a white Google Pay button.
-  // }
+  paywithgoogle: {
+    environment: "TEST", // Change this to PRODUCTION when you're ready to accept live Google Pay payments
+    // amount: {
+    //   currency: "EUR",
+    //   value: 1000
+    // },
+    configuration: {
+      gatewayMerchantId: "CommerceCloudZaid",  //Your Adyen merchant or company account name
+      // merchantIdentifier: "12345678910111213141", // Required for PRODUCTION. Remove this field in TEST. Your Google Merchant ID as described in https://developers.google.com/pay/api/web/guides/test-and-deploy/deploy-production-environment#obtain-your-merchantID
+      merchantName: "Merchant Zaid" // Optional. The name that appears in the payment sheet.
+    },
+    buttonColor: "black", //Optional. Use a white Google Pay button.
+    showPayButton: true,
+    onSubmit: (state, component) => {
+      console.log(state);
+      if (!componentsObj["paywithgoogle"]) {
+        componentsObj["paywithgoogle"] = {};
+      }
+      componentsObj["paywithgoogle"].isValid = isValid;
+      componentsObj[type].stateData = state.data;
+      console.log(componentsObj);
+      document.querySelector('button[value="submit-payment"]').click();
+
+
+      // if(state.isValid) {
+      //   assignPaymentMethodValue();
+      //   document.querySelector("#adyenStateData").value = JSON.stringify(
+      //       componentsObj[selectedMethod].stateData
+      //   );
+      //   paymentFromComponent(state.data, component);
+      // }
+    },
+  }
 };
 if (window.installments) {
   try {
@@ -310,25 +330,7 @@ function renderPaymentMethod(
       container.append(template.content);
     } else {
       try {
-        if(paymentMethod.type === "paywithgoogle") {
-          node = checkout.create(paymentMethod.type, {
-            environment: "TEST", // Change this to PRODUCTION when you're ready to accept live Google Pay payments
-            amount: {
-              currency: "EUR",
-              value: 1000
-            },
-            configuration: {
-              gatewayMerchantId: "CommerceCloudZaid",  //Your Adyen merchant or company account name
-              merchantName: "Zaid Merchant" // Optional. The name that appears in the payment sheet.
-            },
-            buttonColor: "black", //Optional. Use a white Google Pay button.
-            buttonType: "long",
-            emailRequired: true
-            //For other optional configuration, see section below.
-          });
-        } else {
-          node = checkout.create(paymentMethod.type);
-        }
+        node = checkout.create(paymentMethod.type);
         if (!componentsObj[paymentMethodID]) {
           componentsObj[paymentMethodID] = {};
         }
@@ -348,7 +350,7 @@ function renderPaymentMethod(
         .then(() => {
           console.log(node);
           try {
-            node.mount(document.querySelector("#googlepay-container"))
+            node.mount(container);
           }
           catch (e) {
             console.error(e);
@@ -360,7 +362,6 @@ function renderPaymentMethod(
         });
   }
   else {
-    // paymentMethod.type === "paywithgoogle" && !node.isAvailable() ? node = null : null;
     node && node.mount(container);
   }
 
@@ -416,6 +417,7 @@ function paymentFromComponent(data, component) {
     type: "post",
     data: { data: JSON.stringify(data) },
     success: function (data) {
+      console.log(data);
       if (data.fullResponse && data.fullResponse.action) {
         component.handleAction(data.fullResponse.action);
       } else {
