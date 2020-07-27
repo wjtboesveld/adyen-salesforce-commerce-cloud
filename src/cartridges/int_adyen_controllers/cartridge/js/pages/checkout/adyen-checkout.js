@@ -78,6 +78,18 @@ function initializeBillingEvents() {
         billingAddressRequired: false, // turn billingAddress section on/off
         showEmailAddress: false, // allow shopper to specify their email address
       },
+      paywithgoogle: {
+        environment: 'TEST', // Change this to PRODUCTION when you're ready to accept live Google Pay payments
+        onSubmit: (state, component) => {
+          assignPaymentMethodValue();
+          document.querySelector('button[value="submit-payment"]').click();
+        },
+        configuration: {
+          gatewayMerchantId: 'SalesForceMFRA', //window.merchantAccount,  //Your Adyen merchant or company account name
+        },
+        showPayButton: true,
+        buttonColor: "black", //Optional. Use a white Google Pay button.
+      },
       paypal: {
         environment: window.Configuration.environment,
         intent: 'capture',
@@ -460,7 +472,18 @@ function renderPaymentMethod(paymentMethod, storedPaymentMethodBool, path) {
   li.append(container);
   paymentMethodsUI.append(li);
 
-  node && node.mount(container);
+  if(paymentMethod.type == 'paywithgoogle') {
+    node
+        .isAvailable()
+        .then(() => {
+          node.mount(container);
+        })
+        .catch(e => {
+          console.error('google pay not available');
+        });
+  } else {
+    node && node.mount(container);
+  }
 
   const input = document.querySelector(`#rb_${paymentMethodID}`);
   input.onchange = (event) => {
