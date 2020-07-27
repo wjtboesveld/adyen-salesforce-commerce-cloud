@@ -82,7 +82,7 @@ function initializeBillingEvents() {
         environment: 'TEST', // Change this to PRODUCTION when you're ready to accept live Google Pay payments
         onSubmit: (state, component) => {
           assignPaymentMethodValue();
-          document.querySelector('button[value="submit-payment"]').click();
+          document.querySelector('button[id="billing-submit"]').click();
         },
         configuration: {
           gatewayMerchantId: 'SalesForceMFRA', //window.merchantAccount,  //Your Adyen merchant or company account name
@@ -242,7 +242,7 @@ function resolveUnmount(key, val) {
 function displaySelectedMethod(type) {
   selectedMethod = type;
   resetPaymentMethod();
-  if (type !== 'paypal') {
+  if (type !== 'paypal' && type !== 'paywithgoogle') {
     document.querySelector('#billing-submit').disabled = false;
   } else {
     document.querySelector('#billing-submit').disabled = true;
