@@ -1,11 +1,50 @@
 <div class="checkout">
     <div class="payerauth">
-        <form action="${pdict.issuerUrl}" method="post" id="3dform" name="3dform">
+        <form method="post" id="3dform" name="3dform">
             <input type="hidden" name="TermUrl" value="${URLUtils.httpsContinue()}">
             <input type="hidden" name="PaReq" value="${pdict.paRequest}">
             <input type="hidden" name="MD" value="${pdict.md}">
         </form>
         <script language="javascript">
+            const invalidProtocolRegex = /^(%20|\s)*(javascript|data)/im;
+            const ctrlCharactersRegex = /[^\x20-\x7EÀ-ž]/gim;
+            const urlSchemeRegex = /^([^:]+):/gm;
+            const relativeFirstCharacters = [".", "/"];
+
+            function isRelativeUrlWithoutProtocol(url) {
+                return relativeFirstCharacters.indexOf(url[0]) > -1;
+            }
+
+            function sanitizeUrl(url) {
+                if (!url) {
+                    return "about:blank";
+                }
+
+                const sanitizedUrl = url.replace(ctrlCharactersRegex, "").trim();
+
+                if (isRelativeUrlWithoutProtocol(sanitizedUrl)) {
+                    return sanitizedUrl;
+                }
+
+                const urlSchemeParseResults = sanitizedUrl.match(urlSchemeRegex);
+
+                if (!urlSchemeParseResults) {
+                    return sanitizedUrl;
+                }
+
+                const urlScheme = urlSchemeParseResults[0];
+
+                if (invalidProtocolRegex.test(urlScheme)) {
+                    return "about:blank";
+                }
+
+                return sanitizedUrl;
+            }
+            console.log("${pdict.issuerUrl}");
+            console.log(sanitizeUrl("${pdict.issuerUrl}"));
+            document.getElementById('3dform').action = sanitizeUrl("${pdict.issuerUrl}");
+
+
             var loaded = false;
 
             function load() {
